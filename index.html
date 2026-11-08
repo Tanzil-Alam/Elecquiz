@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Electronics Quiz</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+	background:#0c0e11;
+	background-image:radial-gradient(#1a1e24 1px,transparent 1.5px);
+	background-size:18px 18px;
+	min-height:100vh;min-height:100dvh;
+	padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right))
+		max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+	font-family:monospace;
+	-webkit-tap-highlight-color:transparent;
+}
+#board{
+	width:100%;max-width:1100px;margin:0 auto;
+	display:grid;gap:22px;grid-template-columns:1fr;align-items:start;justify-items:center;
+}
+#lcds{
+	width:100%;
+	display:grid;gap:22px;
+	grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));
+	justify-items:center;
+}
+/*oled screen, where ill write questions*/
+.oledmod{width:min(100%,360px);container-type:inline-size}
+.opcb{
+	position:relative;width:100%;aspect-ratio:27/28;
+	background:linear-gradient(145deg,#1b2027,#0e1115);
+	border-radius:4cqw;
+	box-shadow:0 8px 18px rgba(0,0,0,.7),inset 0 0 0 .6cqw #2b323b;
+}
+.hole{position:absolute;width:5cqw;height:5cqw;border-radius:50%;
+	background:#05070a;box-shadow:0 0 0 1cqw #c9a24a,0 0 0 1.4cqw #7a5f22}
+.oglass{
+	position:absolute;left:1cqw;top:3cqw;width:98cqw;height:71cqw;
+	background:linear-gradient(160deg,#16181c,#050607);
+	border-radius:1cqw;box-shadow:inset 0 0 0 .5cqw #2c3036,0 1px 4px #000;
+	display:flex;align-items:center;justify-content:center;
+}
+.ribbon{
+	position:absolute;left:3cqw;top:74cqw;width:94cqw;height:4.2cqw;
+	background:linear-gradient(#b87a35,#7a4a1a);border-radius:.5cqw
+}
+#oled{
+	display:block;width:81%;height:auto;aspect-ratio:2/1;background:#000;
+	box-shadow:0 0 3cqw rgba(110,190,255,.18);
+}
+.sil{position:absolute;color:#e7e7e7;font-weight:bold;white-space:nowrap}
+.olabels{position:absolute;left:0;width:100%;top:81cqw;height:6cqw}
+.olabels span{position:absolute;transform:translateX(-50%);font-size:4.4cqw;color:#e7e7e7;font-weight:bold}
+.opins{position:absolute;top:88.5cqw}
+.opin{position:absolute;width:5.4cqw;height:5.4cqw;border-radius:50%;
+	background:radial-gradient(circle,#05070a 0 28%,#e3bf63 32% 62%, #9a7a2c 66%);
+	transform:translateX(-50%)}
+.smd{position:absolute;background:#c9b48a;border-radius:.4cqw;box-shadow:0 0 0 .3cqw #6a5a3a}
+/*Finnaly!! now, ill add lcd, where options will live, in theme of real 16*2 lcd :) */
+.lcd{width:100%;max-width:420px;container-type:inline-size;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.lcd:focus-visible{outline:3px solid #fff;outline-offset:4px;border-radius:8px}
+.pcb{
+	position:relative;width:100%;aspect-ratio:80/36;
+	background:
+		repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 .4cqw,transparent .4cqw 3cqw),
+	linear-gradient(145deg,#1d62c4,#0e3f8e);
+	border-radius:2.2cqw;
+	box-shadow:0 8px 18px rgba(0,0,0,.7),inset 0 0 0 .5cqw #3c7be0;
+	transition:transform .08s;
+}
+.lcd:active .pcb{transform:translateY(2px) scale(.99)}
+.lcd.hit .pcb{box-shadow:0 8px 18px rgba(0,0,0,.7),inset 0 0 0 .5cqw #fff,0 0 3cqw rgba(169,201,58,.6)}
+.lhole{position:absolute;width:4.4cqw;height:4.4cqw;border-radius:50%;
+	background:#06101f;box-shadow:0 0 0 .9cqw #d3ad4f,0 0 0 1.2cqw #7a5f22}
+.lpins{position:absolute;left:19cqw;top:1.9cqw;width:50cqw;height:3.4cqw}
+.lpin{position:absolute;top:0;width:2.5cqw;height:2.5cqw;border-radius:50%;transform:translateX(-50%);
+	  background:radial-gradient(circle,#06101f 0 26%,#e3bf63 30% 60%,#9a7a2c 65%)}
+	  .bezel{
+		    position:absolute;left:5.4cqw;top:7.4cqw;width:89.1cqw;height:30.25cqw;
+		      background:linear-gradient(160deg,#d5d9de,#8d949c);
+		        border-radius:.8cqw;box-shadow:0 .6cqw 1cqw rgba(0,0,0,.55),inset 0 0 0 .5cqw #5d646b;
+}
+.glass{
+	  position:absolute;left:5%;top:17%;width:90%;height:66%;
+	    background:#a6c836;
+	      box-shadow:inset 0 0 3cqw rgba(0,0,0,.5),0 0 0 .6cqw #1a1d20,0 0 5cqw rgba(166,200,54,.35);
+	        display:flex;align-items:center;padding:0 1.6cqw;overflow:hidden;
+}
+.glass::after{
+	  content:"";position:absolute;inset:0;pointer-events:none;
+	    background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 45%);
+}
+.rows{width:100%}
+.lrow{display:grid;grid-template-columns:repeat(16,1fr);gap:.5cqw}
+.lrow+.lrow{margin-top:.9cqw}
+.lc{
+	  aspect-ratio:5/8;
+	    display:flex;align-items:center;justify-content:center;
+	      color:#0f2108;font-weight:bold;font-size:6.2cqw;line-height:1;
+	        background-color:rgba(0,45,0,.1);
+		  background-image:radial-gradient(circle,rgba(0,45,0,.22) 34%,transparent 40%);
+		    background-size:20% 12.5%;
+}
+.lcd.off .glass{background:#34502f;box-shadow:inset 0 0 3cqw rgba(0,0,0,.6),0 0 0 .6cqw #1a1d20}
+.lcd.off .lc{background-color:rgba(0,0,0,.18);color:transparent}
+.lsil{position:absolute;left:6cqw;bottom:1.6cqw;color:#eaf1ff;font-size:3.3cqw;font-weight:bold;white-space:nowrap}
+.lnum{position:absolute;top:2cqw;color:#eaf1ff;font-size:2.6cqw;font-weight:bold;transform:translateX(-50%)}
+
+@media (min-width:900px) and (orientation:landscape){
+	  #board{grid-template-columns:minmax(280px,360px) 1fr;gap:34px}
+}
+/* phone landscape */
+@media (orientation:landscape) and (max-height:520px){
+	  #board{grid-template-columns:minmax(200px,38%) 1fr;gap:16px;max-width:100%}
+	    .oledmod{width:100%}
+	      #lcds{gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+}
+@media (prefers-reduced-motion:reduce){.pcb{transition:none}}
+</style>
+</head>
+<body>
+<main id ="board">
+	<div class="oledmod">
+		<div class="opcb">
+			<i class="hole" style="left:3cqw;top:93cqw"></i>
+			<i class="hole" style="right:3cqw;top:93cqw"></i>
+			<div class="oglass"><canvas id="oled" width="1024" height="512" role="img" aria-label="OLED display"></canvas></div>
+			<div class="ribbon"></div>
+			<div class="olabels">
+				<span style="left:35.8cqw">GND</span><span style="left:45.2cqw">VCC</span>
+				<span style="left:54.6cqw">SCL</span><span style="left:64cqw">SDA</span>
+			</div>
+			<div class="opins">
+				<i class="opin" style="left:35.8cqw"></i><i class="opin" style="left:45.2cqw"></i>
+				<i class="opin" style="left:54.6cqw"></i><i class="opin" style="left:64cqw"></i>
+			</div>
+			<i class="smd" style="left:12cqw;top:82cqw;width:5cqw;height:2.4cqw"></i>
+			<i class="smd" style="left:12cqw;top:86cqw;width:5cqw;height:2.4cqw"></i>
+			      <i class="smd" style="left:82cqw;top:82cqw;width:5cqw;height:2.4cqw"></i>
+		</div>
+	</div>
+	<div id="lcds"></div>
+</main>
+
+<script>
+	/*finnaly, i can add questions, dont peek answers here ;)*/
+	const Q=[
+		 {q:"Which component stores charge?",o:["Resistor","Capacitor","Diode","Inductor"],a:1},
+		 {q:"Unit of resistance?",o:["Volt","Amp","Ohm","Watt"],a:2},
+		 {q:"Which part allows current one way only?",o:["Diode","Resistor","Capacitor","Fuse"],a:0},
+		 {q:"Unit of capacitance?",o:["Henry","Farad","Ohm","Tesla"],a:1},
+		 {q:"Ohm's law is?",o:["V=IR","V=I/R","V=R/I","V=I+R"],a:0},
+		 {q:"Which part amplifies a signal?",o:["Transistor","Switch","Wire","Fuse"],a:0},
+		 {q:"Unit of current?",o:["Volt","Ampere","Watt","Ohm"],a:1},
+		 {q:"Which part protects from overcurrent?",o:["Fuse","Diode","LED","Relay"],a:0},
+		{q:"which part stores charge in magnatic field?",o:["Inductor","ic","capacitor","diode"],a:0},
+		{q:"what is the peak microcontroller:)",o:["arduino uno","arduino nano","esp32","esp8266"],a:2},
+		{q:"Which part allows to sense/detect things?",o:["Led","relay","battery","sensor"],a:3}
+];
+	const ASK=5;
+	const LABELS="ABCD";
+	const lcdBox=document.getElementById("lcds");
+	for(let n=0;n<4;n++){
+		  const d=document.createElement("div");
+		  d.className="lcd";d.id="l"+n;d.tabIndex=0;d.setAttribute("role","button");
+		  d.setAttribute("aria-label","Option "+LABELS[n]);
+		  let pins="",nums="";
+		  for(let k=0;k<16;k++){
+			      pins+='<i class="lpin" style="left:'+(k*3.1+1.25)+'cqw"></i>';
+			    }d.innerHTML=
+			   '<div class="pcb">'+
+			   '<i class="lhole" style="left:1.8cqw;top:1.8cqw"></i>'+
+			   '<i class="lhole" style="right:1.8cqw;top:1.8cqw"></i>'+
+			   '<i class="lhole" style="left:1.8cqw;bottom:1.8cqw"></i>'+
+			   '<i class="lhole" style="right:1.8cqw;bottom:1.8cqw"></i>'+
+			   '<div class="lpins">'+pins+'</div>'+
+			   '<span class="lnum" style="left:16.6cqw">1</span>'+
+			   '<span class="lnum" style="left:72cqw">16</span>'+
+			   '<div class="bezel"><div class="glass"><div class="rows"></div></div></div>'+
+			   '<span class="lsil">LCD1602  OPTION '+LABELS[n]+'</span>'+
+			   '</div>';
+		  d.onclick=()=>answer(n);
+		  d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();answer(n)}};
+		  lcdBox.appendChild(d);
+}
+	addEventListener("keydown",e=>{
+		  if(e.target.classList&&e.target.classList.contains("lcd"))return;
+		  const k="abcd1234".indexOf(e.key.toLowerCase());
+		  if(k>=0)answer(k%4);
+	});
+	const esc=c=>c===" "?"&nbsp;":c.replace(/[&<>]/g,x=>"&#"+x.charCodeAt(0)+";");
+	const pad=(s,n)=>s.padEnd(n).slice(0,n);
+
+	function lcd(n,t,off){
+		  const s=pad(t.slice(0,16),16)+pad(t.slice(16,32),16);
+		  const row=r=>'<div class="lrow">'+[...s.slice(r*16,r*16+16)]
+		    .map(c=>'<span class="lc">'+esc(c)+'</span>').join("")+'</div>';
+		  const el=document.getElementById("l"+n);
+		  el.classList.toggle("off",!!off);
+		  el.querySelector(".rows").innerHTML=row(0)+row(1);
+	}
+
+	/*oled pixel buffer, will use ai*/
+		const FONT=("0000000000 00005F0000 0007000700 147F147F14 242A7F2A12 2313086462 3649552250 0005030000 001C224100 0041221C00 14083E0814 08083E0808 0050300000 0808080808 0060600000 2010080402 "+
+			"3E5149453E 00427F4000 4261514946 2141454B31 1814127F10 2745454539 3C4A494930 0171090503 3649494936 064949291E 0036360000 0056360000 0814224100 1414141414 0041221408 0201510906 "+
+			"324979413E 7E1111117E 7F49494936 3E41414122 7F4141221C 7F49494941 7F09090901 3E4149497A 7F0808087F 00417F4100 2040413F01 7F08142241 7F40404040 7F020C027F 7F0408107F 3E4141413E "+
+			"7F09090906 3E4151215E 7F09192946 4649494931 01017F0101 3F4040403F 1F2040201F 3F4038403F 6314081463 0708700807 6151494543 007F414100 0204081020 0041417F00 0402010204 4040404040 "+
+			"0001020400 2054545478 7F48444438 3844444420 384444487F 3854545418 087E090102 0C5252523E 7F08040478 00447D4000 2040443D00 7F10284400 00417F4000 7C04180478 7C08040478 3844444438 "+
+			"7C14141408 081414187C 7C08040408 4854545420 043F444020 3C4040207C 1C2040201C 3C4030403C 4428102844 0C5050503C 4464544C44 0008364100 00007F0000 0041360800 0201020402").split(" ")
+	  .map(h=>[0,2,4,6,8].map(i=>parseInt(h.substr(i,2),16)));
+
+	const W=128,H=64,S=8;
+	const cv=document.getElementById("oled"),cx=cv.getContext("2d");
+	let buf=new Uint8Array(W*H);
+	const clear=()=>buf.fill(0);
+	function px(x,y,v){if(x>=0&&y>=0&&x<W&&y<H)buf[y*W+x]=v}
+	function rect(x,y,w,h,v=1){for(let j=0;j<h;j++)for(let i=0;i<w;i++)px(x+i,y+j,v)}
+	function frame(x,y,w,h){rect(x,y,w,1);rect(x,y+h-1,w,1);rect(x,y,1,h);rect(x+w-1,y,1,h)}
+	const tw=(s,sc=1)=>(s.length*6-1)*sc;
+	function text(x,y,s,sc=1,v=1){
+		  for(let i=0;i<s.length;i++){
+			      const g=FONT[s.charCodeAt(i)-32]||FONT[31];
+			      for(let c=0;c<5;c++)for(let r=0;r<7;r++)
+				        if(g[c]>>r&1)rect(x+(i*6+c)*sc,y+r*sc,sc,sc,v);
+			      const dc=s[i]==='p'?0:s[i]==='q'?4:-1;
+			      if(dc>=0)rect(x+(i*6+dc)*sc,y+7*sc,sc,2*sc,v);
+			    }
+	}
+	const center=(y,s,sc=1,v=1)=>text(Math.round((W-tw(s,sc))/2),y,s,sc,v);
+	function header(left,right){
+		  rect(0,0,W,10);
+		  text(3,1,left,1,0);
+		  text(W-3-tw(right),1,right,1,0);
+	}
+	function flush(){
+		  cx.fillStyle="#000";cx.fillRect(0,0,cv.width,cv.height);
+		  cx.fillStyle="#e4f3ff";
+		  for(let y=0;y<H;y++)for(let x=0;x<W;x++)
+			    if(buf[y*W+x])cx.fillRect(x*S,y*S,S,S);
+		  cx.fillStyle="rgba(0,0,0,.22)";
+		  for(let x=0;x<=W;x++)cx.fillRect(x*S-1,0,2,cv.height);
+		  for(let y=0;y<=H;y++)cx.fillRect(0,y*S-1,cv.width,2);
+	}
+	function wrap(text,w){
+		  const out=[];let line="";
+		  for(let word of text.split(" ")){
+			      while(word.length>w){if(line){out.push(line);line=""}out.push(word.slice(0,w));word=word.slice(w)}
+			      if((line?line.length+1:0)+word.length<=w)line=line?line+" "+word:word;
+			      else{out.push(line);line=word}
+			    }
+		  if(line)out.push(line);
+		  return out;
+	}
+	function progress(done,total){
+		  const gap=3,w=Math.floor((W-4-(total-1)*gap)/total);
+		  for(let k=0;k<total;k++){
+			      const x=2+k*(w+gap);
+			      if(k<done)rect(x,57,w,5);
+			      else if(k===done)frame(x,57,w,5);
+			      else rect(x,60,w,1);
+			    }
+	}
+
+	/*The game*/
+	let qs=[],i=0,score=0;
+	function start(){
+		  qs=[...Q].sort(()=>Math.random()-.5).slice(0,ASK);
+		  i=0;score=0;show();
+	}
+	function show(){
+		  clear();
+		  header("QUIZ","Q"+(i+1)+"/"+qs.length);
+		  wrap(qs[i].q,21).slice(0,4).forEach((l,k)=>text(0,15+k*10,l));
+		  progress(i,qs.length);
+		  flush();
+		  qs[i].o.forEach((o,n)=>lcd(n,LABELS[n]+":"+o));
+	}
+	function answer(n){
+		  const el=document.getElementById("l"+n);
+		  el.classList.add("hit");setTimeout(()=>el.classList.remove("hit"),150);
+		  if(!qs[i])return start();
+		  if(n===qs[i].a)score++;
+		  i++;
+		  if(i<qs.length)show();
+		  else{
+			      const total=qs.length;
+			      clear();
+			      header("QUIZ","DONE");
+			      center(15,score+"/"+total,4);
+			      const bw=W-4,fill=Math.round(bw*score/total);
+			      frame(2,46,bw,6);rect(2,46,fill,6);
+			      center(54,"Tap to retry");
+			      flush();
+			      for(let k=0;k<4;k++)lcd(k,"",true);
+			      qs=[];
+			    }
+	}
+	start();
+</script>
+</body>
+</html>
